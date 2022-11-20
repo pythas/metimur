@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: mosquitto
+    ports:
+      - 1883:1883
+      - 9001:9001
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/log:/mosquitti/log
+      - mosquitto:/mosquitto/data
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana-oss
+    container_name: grafana
+    ports:
+      - 3000:3000
+    user: "1000"
+    volumes:
+      - grafana:/var/lib/grafana
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus/config:/etc/prometheus
+      - prometheus:/prometheus
+    restart: unless-stopped
+
+  mqtt-exporter:
+    image: kpetrem/mqtt-exporter
+    container_name: mqtt-exporter
+    ports:
+       - 9000:9000
+    environment:
+      - MQTT_ADDRESS=mosquitto
+    restart: unless-stopped
+
+volumes:
+  mosquitto: ~
+  grafana: ~
+  prometheus: ~
+
